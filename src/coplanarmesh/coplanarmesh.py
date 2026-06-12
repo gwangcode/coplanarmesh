@@ -121,7 +121,7 @@ def clean_mesh_and_reindex(vertsA, facesA, overlapA, vertsB, facesB, overlapB, r
     return meshA_final, meshB_final, new_overlapA, sorted(final_overlap_pairs)
 
 
-def remesh(mesh_list, grid_size=1e-5, eps=1e-5, min_area_eps=1e-6):
+def mremesh(mesh_list, grid_size=1e-5, eps=1e-5, min_area_eps=1e-6):
     """
     Executes a unified, cascading coplanar intersection stream and realigns global mesh indices.
 
@@ -141,7 +141,6 @@ def remesh(mesh_list, grid_size=1e-5, eps=1e-5, min_area_eps=1e-6):
             - final_meshes (list of trimesh.Trimesh): Sequentially remeshed and sanitized 3D objects.
             - global_pairs (list of tuple): An aligned contact matrix sorted as `(mesh_i, face_i, mesh_j, face_j)`.
     """
-    from .remesh import process_and_label_coplanar  # Deferred local import to break circular reference
     num_meshes = len(mesh_list)
 
     # Defensive Deep-Copy & Voxel Grid Alignment initialization
@@ -218,3 +217,39 @@ def remesh(mesh_list, grid_size=1e-5, eps=1e-5, min_area_eps=1e-6):
                             final_global_pairs.add((i, idxA, j, idxB))
 
     return final_meshes, sorted(list(final_global_pairs))
+
+
+def smesh(meshA, meshB):
+    """
+    Executes boundary-aligned topological remeshing for multi-body 3D geometries
+    sharing touching co-planar interfaces.
+
+    This is the high-level API utilized as an optical simulation pre-processor
+    to eliminate numerical ray-flickering and enforce energy conservation laws.
+
+    Args:
+        meshA (trimesh.Trimesh): The first 3D manifold geometry (e.g., Lens A).
+        meshB (trimesh.Trimesh): The second 3D manifold geometry (e.g., Lens B).
+
+    Returns:
+        meshA_final (trimesh.Trimesh): Remeshed geometry A with aligned boundary topology.
+        meshB_final (trimesh.Trimesh): Remeshed geometry B with aligned boundary topology.
+        final_overlap_pairs (list of tuples): Re-indexed pairs of perfectly overlapping
+                                              co-planar facet IDs for the physics solver.
+    """
+    from .remesh import process_and_label_coplanar
+
+    # 1. Execute the core dispatcher to perform CSG subtraction and patch sewing
+    meshA_patch, meshB_patch, overlapA, overlapB, _ = process_and_label_coplanar(meshA, meshB)
+
+    # 2. Re-index and collapse degenerate elements to build clean final topologies
+    meshA_final, meshB_final, final_overlap_A, final_overlap_pairs = clean_mesh_and_reindex(
+        vertsA=meshA_patch.vertices,
+        facesA=meshA_patch.faces,
+        overlapA=overlapA,
+        vertsB=meshB_patch.vertices,
+        facesB=meshB_patch.faces,
+        overlapB=overlapB
+    )
+
+    return meshA_final, meshB_final, final_overlap_pairs

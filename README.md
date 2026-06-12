@@ -1,5 +1,4 @@
 # CoplanarMesh 🚀
-[![DOI](https://zenodo.org/badge/1267453056.svg)](https://doi.org/10.5281/zenodo.20669005)
 
 **CoplanarMesh** is a robust, industrial-grade 3D triangular mesh pipeline designed for **coplanar overlap detection, adaptive slicing, watertight stitching, and global index re-alignment**. 
 
@@ -37,15 +36,8 @@ The top-level stream component. It accepts a sequence of $N$ arbitrary meshes an
 
 ### ⚡ Adaptive Local Tolerances (`safe_inter_eps`)
 Global rigid tolerances ruin complex assemblies. If set too small, jagged floating-point boundaries create sliver-face artifacts; if set too large, micro-scale features are ignored. **CoplanarMesh** uses an adaptive threshold mechanism:
-```math
-\text{local\_avg\_area} = \frac{\text{Area}(\text{polyA}) + \text{Area}(\text{polyB})}{2}
-
-```
-
-```math
-\text{safe\_inter\_eps} = \max(\text{min\_area\_eps}, \text{local\_avg\_area} \times \text{eps})
-
-```
+$$\text{local\_avg\_area} = \frac{\text{Area}(\text{polyA}) + \text{Area}(\text{polyB})}{2}$$
+$$\text{safe\_inter\_eps} = \max(\text{min\_area\_eps}, \text{local\_avg\_area} \times \text{eps})$$
 This allows massive structural wall sheets to flush out micro-meter edge noise with aggressive filtering while automatically tightening down the defense barrier to preserve tiny mechanical pin connectors.
 
 ### 🏷️ Lossless Reverse Index Alignment
@@ -75,11 +67,30 @@ pip install .
 
 ## 🚀 Quick Start Guide
 
-The entire multi-body workflow is wrapped into a clean, unified `remesh` interface. Here is a production-level usage example creating a close-contact coplanar scene:
+### Quick Start 🚀
+
+For high-level multi-body optical simulation pre-processing, use the unified `smesh` API:
 
 ```python
 import trimesh
-from coplanarmesh import remesh
+from coplanarmesh import smesh
+
+# Load two touching optical elements sharing a perfect co-planar interface
+mesh_lens_a = trimesh.load("lens_a.stl")
+mesh_lens_b = trimesh.load("lens_b.stl")
+
+# Execute boundary-aligned remeshing
+lens_a_clean, lens_b_clean, overlap_pairs = smesh(mesh_lens_a, mesh_lens_b)
+
+# Now lens_a_clean and lens_b_clean share perfectly aligned interface topologies,
+# preventing ray-flickering and ensuring energy conservation in your ray-tracer!
+
+```
+The entire multi-body workflow is wrapped into a clean, unified `mremesh` interface. Here is a production-level usage example creating a close-contact coplanar scene:
+
+```python
+import trimesh
+from coplanarmesh import mremesh
 
 # 1. Instantiate two standard primitives with a perfect contact interface
 boxA = trimesh.creation.box(extents=[1.0, 1.0, 1.0])
@@ -92,7 +103,7 @@ mesh_list = [boxA, boxB]
 
 # 2. Invoke the unified cascading remesh pipeline
 # It handles slicing, collapses sliver nodes, and aligns global indices
-final_meshes, global_pairs = remesh(mesh_list, grid_size=1e-5, eps=1e-5)
+final_meshes, global_pairs = mremesh(mesh_list, grid_size=1e-5, eps=1e-5)
 
 print(f"Remeshing process completed.")
 print(f"Total structured meshes generated: {len(final_meshes)}")
