@@ -76,18 +76,18 @@ pip install .
 
 ### Quick Start 🚀
 
-For high-level multi-body optical simulation pre-processing, use the unified `smesh` API:
+For high-level multi-body optical simulation pre-processing, use the unified `sremesh` API:
 
 ```python
 import trimesh
-from coplanarmesh import smesh
+from coplanarmesh import sremesh
 
 # Load two touching optical elements sharing a perfect co-planar interface
 mesh_lens_a = trimesh.load("lens_a.stl")
 mesh_lens_b = trimesh.load("lens_b.stl")
 
 # Execute boundary-aligned remeshing
-lens_a_clean, lens_b_clean, overlap_pairs = smesh(mesh_lens_a, mesh_lens_b)
+lens_a_clean, lens_b_clean, overlap_pairs = sremesh(mesh_lens_a, mesh_lens_b)
 
 # Now lens_a_clean and lens_b_clean share perfectly aligned interface topologies,
 # preventing ray-flickering and ensuring energy conservation in your ray-tracer!

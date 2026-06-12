@@ -2,6 +2,7 @@ import numpy as np
 import trimesh
 from shapely.geometry import Polygon
 from .utils import snap_and_clean_mesh
+from .remesh import process_and_label_coplanar
 
 
 def clean_single_side(vertices, faces, overlap_indices, eps=1e-5, area_eps=1e-12):
@@ -219,7 +220,7 @@ def mremesh(mesh_list, grid_size=1e-5, eps=1e-5, min_area_eps=1e-6):
     return final_meshes, sorted(list(final_global_pairs))
 
 
-def smesh(meshA, meshB):
+def sremesh(meshA, meshB):
     """
     Executes boundary-aligned topological remeshing for multi-body 3D geometries
     sharing touching co-planar interfaces.
@@ -237,7 +238,6 @@ def smesh(meshA, meshB):
         final_overlap_pairs (list of tuples): Re-indexed pairs of perfectly overlapping
                                               co-planar facet IDs for the physics solver.
     """
-    from .remesh import process_and_label_coplanar
 
     # 1. Execute the core dispatcher to perform CSG subtraction and patch sewing
     meshA_patch, meshB_patch, overlapA, overlapB, _ = process_and_label_coplanar(meshA, meshB)

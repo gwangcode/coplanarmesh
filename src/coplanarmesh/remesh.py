@@ -7,7 +7,7 @@ from collections import defaultdict
 from .hashing import precompute_plane_drawers
 from .geometry import get_projection_axes, project_to_plane_with_axes, remesh_shapely_polygon
 from .utils import snap_and_clean_mesh
-from .coplanarmesh import clean_mesh_and_reindex
+
 
 def patch_single_mesh(mesh, regions, face_ids_to_remove, is_mesh_b=False, digits_vertex=5):
     """
