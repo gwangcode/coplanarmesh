@@ -36,8 +36,8 @@ The top-level stream component. It accepts a sequence of $N$ arbitrary meshes an
 
 ### ⚡ Adaptive Local Tolerances (`safe_inter_eps`)
 Global rigid tolerances ruin complex assemblies. If set too small, jagged floating-point boundaries create sliver-face artifacts; if set too large, micro-scale features are ignored. **CoplanarMesh** uses an adaptive threshold mechanism:
-$$\text{local\_avg\_area} = \frac{\text{Area}(\text{polyA}) + \text{Area}(\text{polyB})}{2}$$
-$$\text{safe\_inter\_eps} = \max(\text{min\_area\_eps}, \text{local\_avg\_area} \times \text{eps})$$
+$$\text{local_avg_area} = \frac{\text{Area}(\text{polyA}) + \text{Area}(\text{polyB})}{2}$$
+$$\text{safe\inter_eps} = \max(\text{min\_area\_eps}, \text{local_avg_area} \times \text{eps})$$
 This allows massive structural wall sheets to flush out micro-meter edge noise with aggressive filtering while automatically tightening down the defense barrier to preserve tiny mechanical pin connectors.
 
 ### 🏷️ Lossless Reverse Index Alignment
