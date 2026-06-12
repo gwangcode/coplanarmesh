@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "coplanarmesh"
-version = "0.1.0"
+version = "0.1.1"
 description = "A robust 3D mesh coplanar overlap processing, adaptive remeshing and index alignment library."
 readme = "README.md"
 requires-python = ">=3.8"

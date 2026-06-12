@@ -160,7 +160,7 @@ If you utilize `coplanarmesh` in your academic research, physical optics simulat
 
 ### APA Format
 ```text
-Wang, G. (2026). coplanarmesh: Robust Boundary-Aligned Remeshing for Multi-Body 3D Optical Ray-Tracing (Version 0.1.0) [Computer software]. Zenodo. [10.5281/zenodo.20669005](10.5281/zenodo.20669005)
+Wang, G. (2026). coplanarmesh: Robust Boundary-Aligned Remeshing for Multi-Body 3D Optical Ray-Tracing (Version 0.1.1) [Computer software]. Zenodo. [10.5281/zenodo.20669005](10.5281/zenodo.20669005)
 
 ```
 
@@ -173,7 +173,7 @@ Wang, G. (2026). coplanarmesh: Robust Boundary-Aligned Remeshing for Multi-Body 
   month        = jun,
   year         = 2026,
   publisher    = {Zenodo},
-  version      = {v0.1.0},
+  version      = {v0.1.1},
   doi          = {10.5281/zenodo.20669005},
   url          = {[https://doi.org/10.5281/zenodo.20669005](https://doi.org/10.5281/zenodo.XXXXXXX)}
 }

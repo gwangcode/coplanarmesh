@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: coplanarmesh
-Version: 0.1.0
+Version: 0.1.1
 Summary: A robust 3D mesh coplanar overlap processing, adaptive remeshing and index alignment library.
 Author-email: Your Name <your.email@example.com>
 License: MIT
@@ -9,11 +9,13 @@ Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
 Requires-Python: >=3.8
 Description-Content-Type: text/markdown
+License-File: LICENSE
 Requires-Dist: trimesh>=4.0.0
 Requires-Dist: numpy>=1.20.0
 Requires-Dist: shapely>=2.0.0
 Requires-Dist: triangle
 Requires-Dist: pymeshfix
+Dynamic: license-file
 
 # CoplanarMesh 🚀
 
@@ -53,8 +55,15 @@ The top-level stream component. It accepts a sequence of $N$ arbitrary meshes an
 
 ### ⚡ Adaptive Local Tolerances (`safe_inter_eps`)
 Global rigid tolerances ruin complex assemblies. If set too small, jagged floating-point boundaries create sliver-face artifacts; if set too large, micro-scale features are ignored. **CoplanarMesh** uses an adaptive threshold mechanism:
-$$\text{local\_avg\_area} = \frac{\text{Area}(\text{polyA}) + \text{Area}(\text{polyB})}{2}$$
-$$\text{safe\_inter\_eps} = \max(\text{min\_area\_eps}, \text{local\_avg\_area} \times \text{eps})$$
+```math
+\text{local\_avg\_area} = \frac{\text{Area}(\text{polyA}) + \text{Area}(\text{polyB})}{2}
+
+```
+
+```math
+\text{safe\_inter\_eps} = \max(\text{min\_area\_eps}, \text{local\_avg\_area} \times \text{eps})
+
+```
 This allows massive structural wall sheets to flush out micro-meter edge noise with aggressive filtering while automatically tightening down the defense barrier to preserve tiny mechanical pin connectors.
 
 ### 🏷️ Lossless Reverse Index Alignment
@@ -84,11 +93,30 @@ pip install .
 
 ## 🚀 Quick Start Guide
 
-The entire multi-body workflow is wrapped into a clean, unified `remesh` interface. Here is a production-level usage example creating a close-contact coplanar scene:
+### Quick Start 🚀
+
+For high-level multi-body optical simulation pre-processing, use the unified `sremesh` API:
 
 ```python
 import trimesh
-from coplanarmesh import remesh
+from coplanarmesh import sremesh
+
+# Load two touching optical elements sharing a perfect co-planar interface
+mesh_lens_a = trimesh.load("lens_a.stl")
+mesh_lens_b = trimesh.load("lens_b.stl")
+
+# Execute boundary-aligned remeshing
+lens_a_clean, lens_b_clean, overlap_pairs = sremesh(mesh_lens_a, mesh_lens_b)
+
+# Now lens_a_clean and lens_b_clean share perfectly aligned interface topologies,
+# preventing ray-flickering and ensuring energy conservation in your ray-tracer!
+
+```
+The entire multi-body workflow is wrapped into a clean, unified `mremesh` interface. Here is a production-level usage example creating a close-contact coplanar scene:
+
+```python
+import trimesh
+from coplanarmesh import mremesh
 
 # 1. Instantiate two standard primitives with a perfect contact interface
 boxA = trimesh.creation.box(extents=[1.0, 1.0, 1.0])
@@ -101,7 +129,7 @@ mesh_list = [boxA, boxB]
 
 # 2. Invoke the unified cascading remesh pipeline
 # It handles slicing, collapses sliver nodes, and aligns global indices
-final_meshes, global_pairs = remesh(mesh_list, grid_size=1e-5, eps=1e-5)
+final_meshes, global_pairs = mremesh(mesh_list, grid_size=1e-5, eps=1e-5)
 
 print(f"Remeshing process completed.")
 print(f"Total structured meshes generated: {len(final_meshes)}")
@@ -141,5 +169,32 @@ coplanarmesh/
 Distributed under the MIT License. Contributions focused on accelerating the 2D polygon intersection speed via customized C-bindings or vectorized spatial-trees are highly welcome.
 
 ```
+
+```
+---
+
+## Citation 🎓
+
+If you utilize `coplanarmesh` in your academic research, physical optics simulations, or geometric computing projects, please cite this repository using the following Zenodo DOI:
+
+### APA Format
+```text
+Wang, G. (2026). coplanarmesh: Robust Boundary-Aligned Remeshing for Multi-Body 3D Optical Ray-Tracing (Version 0.1.1) [Computer software]. Zenodo. [10.5281/zenodo.20669005](10.5281/zenodo.20669005)
+
+```
+
+### BibTeX Format (for LaTeX users)
+
+```bibtex
+@software{coplanarmesh2026,
+  author       = {Gang Wang},
+  title        = {coplanarmesh: Robust Boundary-Aligned Remeshing for Multi-Body 3D Optical Ray-Tracing},
+  month        = jun,
+  year         = 2026,
+  publisher    = {Zenodo},
+  version      = {v0.1.1},
+  doi          = {10.5281/zenodo.20669005},
+  url          = {[https://doi.org/10.5281/zenodo.20669005](https://doi.org/10.5281/zenodo.XXXXXXX)}
+}
 
 ```
