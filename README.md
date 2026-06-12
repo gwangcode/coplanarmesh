@@ -152,3 +152,30 @@ Distributed under the MIT License. Contributions focused on accelerating the 2D 
 ```
 
 ```
+---
+
+## Citation 🎓
+
+If you utilize `coplanarmesh` in your academic research, physical optics simulations, or geometric computing projects, please cite this repository using the following Zenodo DOI:
+
+### APA Format
+```text
+Wang, G. (2026). coplanarmesh: Robust Boundary-Aligned Remeshing for Multi-Body 3D Optical Ray-Tracing (Version 0.1.0) [Computer software]. Zenodo. [10.5281/zenodo.20669005](10.5281/zenodo.20669005)
+
+```
+
+### BibTeX Format (for LaTeX users)
+
+```bibtex
+@software{coplanarmesh2026,
+  author       = {Gang Wang},
+  title        = {coplanarmesh: Robust Boundary-Aligned Remeshing for Multi-Body 3D Optical Ray-Tracing},
+  month        = jun,
+  year         = 2026,
+  publisher    = {Zenodo},
+  version      = {v0.1.0},
+  doi          = {10.5281/zenodo.20669005},
+  url          = {[https://doi.org/10.5281/zenodo.20669005](https://doi.org/10.5281/zenodo.XXXXXXX)}
+}
+
+```
