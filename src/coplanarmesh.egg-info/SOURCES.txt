@@ -1,0 +1,13 @@
+README.md
+pyproject.toml
+src/coplanarmesh/__init__.py
+src/coplanarmesh/coplanarmesh.py
+src/coplanarmesh/geometry.py
+src/coplanarmesh/hashing.py
+src/coplanarmesh/remesh.py
+src/coplanarmesh/utils.py
+src/coplanarmesh.egg-info/PKG-INFO
+src/coplanarmesh.egg-info/SOURCES.txt
+src/coplanarmesh.egg-info/dependency_links.txt
+src/coplanarmesh.egg-info/requires.txt
+src/coplanarmesh.egg-info/top_level.txt
