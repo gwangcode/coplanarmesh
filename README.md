@@ -181,3 +181,6 @@ Wang, G. (2026). coplanarmesh: Robust Boundary-Aligned Remeshing for Multi-Body 
 }
 
 ```
+or cite our preprint:
+
+Wang, Gang, *CoplanarMesh: A Python Framework for Boundary-Aligned Topological Remeshing in Multi-Body Physical Simulations* (June 21, 2026). Available at SSRN: https://ssrn.com/abstract=6974720
