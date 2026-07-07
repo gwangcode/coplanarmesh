@@ -4,6 +4,6 @@ authors:
   - family-names: "Wang"
     given-names: "Gang"
 title: "CoplanarMesh: A Python Framework for Boundary-Aligned Topological Remeshing in Multi-Body Physical Simulations"
-date-released: 2026-06-21
+version: "1.0.0"
+date-released: "2026-06-21"
 url: "https://ssrn.com/abstract=6974720"
-type: article
