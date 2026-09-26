@@ -1,6 +1,7 @@
 # CoplanarMesh 🚀
 
 [![DOI](https://zenodo.org/badge/1267453056.svg)](https://doi.org/10.5281/zenodo.20669005)
+[![CI Build and Test](https://github.com/gwangcode/coplanarmesh/actions/workflows/ci.yml/badge.svg)](https://github.com/gwangcode/coplanarmesh/actions)
 
 **CoplanarMesh** is a robust, industrial-grade 3D triangular mesh pipeline designed for **coplanar overlap detection, adaptive slicing, watertight stitching, and global index re-alignment**. 
 
@@ -47,9 +48,11 @@ Global rigid tolerances ruin complex assemblies. If set too small, jagged floati
 \text{safe\_inter\_eps} = \max(\text{min\_area\_eps}, \text{local\_avg\_area} \times \text{eps})
 
 ```
+
 This allows massive structural wall sheets to flush out micro-meter edge noise with aggressive filtering while automatically tightening down the defense barrier to preserve tiny mechanical pin connectors.
 
 ### 🏷️ Lossless Reverse Index Alignment
+
 Tracking face indices through deep multi-body boolean operations is historically a nightmare. **CoplanarMesh** solves this by separating the geometric cutting from index logging. It cuts meshes freely, stabilizes their topologies, and then uses a highly optimized 2D spatial overlapping area index-reflection pass at the very end to deliver an immutable, perfectly clean global contact ledger.
 
 ---
@@ -59,7 +62,9 @@ Tracking face indices through deep multi-body boolean operations is historically
 Clone this repository, navigate to the folder containing `pyproject.toml`, and choose one of the installation strategies:
 
 ### 1. Developer Mode (Highly Recommended)
+
 Any structural or algorithmic modifications made to the source `.py` files take effect immediately across your python environment without re-running scripts.
+
 ```bash
 pip install -e .
 
@@ -74,9 +79,37 @@ pip install .
 
 ---
 
+## 🧪 Testing & CI
+
+We use `pytest` for automated unit testing. Run tests locally via:
+
+```bash
+pip install pytest
+pytest
+
+```
+
+Continuous Integration (CI) is powered by GitHub Actions, which automatically runs unit testing across Python versions on every commit.
+
+---
+
+## 📊 Reproducing Paper Artifacts
+
+To reproduce the benchmark performance table (Table 2) and boundary topological conformance results (Figure 4) presented in the *SoftwareX* paper, run the following automated script:
+
+```bash
+python softwareX_revision_codes/run_all_benchmarks.py
+python softwareX_revision_codes/verify_ray_flickering.py
+
+```
+
+This will automatically execute the test suite and export `benchmark_results.csv` and `ray_leakage_benchmark.png`.
+
+---
+
 ## 🚀 Quick Start Guide
 
-### Quick Start 🚀
+### Single Pair Remeshing API (`sremesh`)
 
 For high-level multi-body optical simulation pre-processing, use the unified `sremesh` API:
 
@@ -95,6 +128,9 @@ lens_a_clean, lens_b_clean, overlap_pairs = sremesh(mesh_lens_a, mesh_lens_b)
 # preventing ray-flickering and ensuring energy conservation in your ray-tracer!
 
 ```
+
+### Multi-Body Cascading Remeshing API (`mremesh`)
+
 The entire multi-body workflow is wrapped into a clean, unified `mremesh` interface. Here is a production-level usage example creating a close-contact coplanar scene:
 
 ```python
@@ -132,7 +168,13 @@ The localized architecture inside `src/coplanarmesh/` is laid out as follows:
 
 ```text
 coplanarmesh/
+├── .github/
+│   └── workflows/
+│       └── ci.yml              # GitHub Actions CI workflow
+├── tests/                      # Automated pytest unit test suite
+├── softwareX_revision_codes/   # One-click paper artifact reproduction scripts
 ├── pyproject.toml              # Modern setuptools pep517 build backend
+├── requirements.txt            # Environment dependencies
 ├── README.md                   # Technical documentation and layout manual
 └── src/
     └── coplanarmesh/           # Main package namespace
@@ -151,9 +193,6 @@ coplanarmesh/
 
 Distributed under the MIT License. Contributions focused on accelerating the 2D polygon intersection speed via customized C-bindings or vectorized spatial-trees are highly welcome.
 
-```
-
-```
 ---
 
 ## Citation 🎓
@@ -161,8 +200,9 @@ Distributed under the MIT License. Contributions focused on accelerating the 2D 
 If you utilize `coplanarmesh` in your academic research, physical optics simulations, or geometric computing projects, please cite this repository using the following Zenodo DOI:
 
 ### APA Format
+
 ```text
-Wang, G. (2026). coplanarmesh: Robust Boundary-Aligned Remeshing for Multi-Body 3D Optical Ray-Tracing (Version 0.1.1) [Computer software]. Zenodo. [10.5281/zenodo.20669005](10.5281/zenodo.20669005)
+Wang, G. (2026). coplanarmesh: Robust Boundary-Aligned Remeshing for Multi-Body 3D Optical Ray-Tracing (Version 0.1.1) [Computer software]. Zenodo. [https://doi.org/10.5281/zenodo.20669005](https://doi.org/10.5281/zenodo.20669005)
 
 ```
 
@@ -177,12 +217,14 @@ Wang, G. (2026). coplanarmesh: Robust Boundary-Aligned Remeshing for Multi-Body 
   publisher    = {Zenodo},
   version      = {v0.1.1},
   doi          = {10.5281/zenodo.20669005},
-  url          = {[https://doi.org/10.5281/zenodo.20669005](https://doi.org/10.5281/zenodo.XXXXXXX)}
+  url          = {[https://doi.org/10.5281/zenodo.20669005](https://doi.org/10.5281/zenodo.20669005)}
 }
 
 ```
+
 or cite our preprint:
 
 ```text
-Wang, Gang, *CoplanarMesh: A Python Framework for Boundary-Aligned Topological Remeshing in Multi-Body Physical Simulations* (June 21, 2026). Available at SSRN: https://ssrn.com/abstract=6974720
+Wang, Gang, CoplanarMesh: A Python Framework for Boundary-Aligned Topological Remeshing in Multi-Body Physical Simulations (June 21, 2026). Available at SSRN: [https://ssrn.com/abstract=6974720](https://ssrn.com/abstract=6974720)
+
 ```
