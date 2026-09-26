@@ -1,0 +1,9 @@
+# 核心计算依赖
+numpy>=1.21.0
+scipy>=1.7.0
+trimesh>=3.10.0
+mapbox_earcut>=1.0.0; platform_system!="Windows" # 如果用到了特定的剖分库
+
+# 可选/开发与测试依赖
+pytest>=7.0.0
+matplotlib>=3.5.0
