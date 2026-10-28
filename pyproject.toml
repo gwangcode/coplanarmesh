@@ -24,7 +24,8 @@ dependencies = [
     "shapely>=2.0.0",
     "triangle",
     "pymeshfix",
-    "rtree"
+    "rtree",
+    "networkx"
 ]
 
 [tool.setuptools.packages.find]
