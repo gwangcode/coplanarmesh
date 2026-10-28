@@ -1,4 +1,195 @@
-name: CI Build and Test
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Fast test suite: runs on every PR and push.
+  # - Python 3.9 - 3.13 matrix
+  # - Skips tests marked "slow"
+  # - Uploads coverage + JUnit XML
+  # ---------------------------------------------------------------------------
+  tests:
+    name: tests (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install system build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+
+      - name: Install package and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[test]"
+
+      - name: Show environment
+        run: |
+          python --version
+          pip list
+
+      - name: Run fast tests
+        run: |
+          pytest -m "not slow" \
+                 -v \
+                 --cov=coplanarmesh \
+                 --cov-report=term-missing \
+                 --cov-report=xml:coverage.xml \
+                 --junitxml=pytest_fast.xml
+
+      - name: Upload fast test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-fast-py${{ matrix.python-version }}
+          path: |
+            pytest_fast.xml
+            coverage.xml
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------------------
+  # Slow test suite: runs only on main and manual dispatch.
+  # Covers the multibody cascade and order-dependence tests.
+  # ---------------------------------------------------------------------------
+  slow-tests:
+    name: slow tests (py3.11)
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install system build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+
+      - name: Install package and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[test]"
+
+      - name: Run slow tests
+        run: |
+          pytest -m "slow" \
+                 -v \
+                 --junitxml=pytest_slow.xml
+
+      - name: Upload slow test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-slow-py3.11
+          path: pytest_slow.xml
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------------------
+  # Reproduce-paper-artifacts job: verifies that
+  # examples/reproduce_paper_artifacts.py runs end-to-end in --quick mode.
+  # This is what Major 8 asks for: "scripts that reproduce every result".
+  # ---------------------------------------------------------------------------
+  reproduce-artifacts:
+    name: reproduce paper artifacts (--quick)
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install system build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+
+      - name: Install package and reproduction dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[test,repro]"
+
+      - name: Run reproduction script (quick mode)
+        run: |
+          python examples/reproduce_paper_artifacts.py --quick --output-dir paper_artifacts
+
+      - name: Verify expected outputs exist
+        run: |
+          set -e
+          test -f paper_artifacts/benchmark_results.csv
+          test -f paper_artifacts/conformance.csv
+          test -f paper_artifacts/environment.txt
+          echo "All expected artifacts present."
+
+      - name: Upload paper artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-artifacts
+          path: paper_artifacts/
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------------------
+  # Optional lint job: ruff check. Non-blocking on PR, blocking on main.
+  # Remove this job if you do not want linting in CI.
+  # ---------------------------------------------------------------------------
+  lint:
+    name: lint (ruff)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install ruff
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+
+      - name: Run ruff
+        run: |
+          ruff check src tests examples
+        continue-on-error: ${{ github.event_name == 'pull_request' }}name: CI Build and Test
 
 on:
   push:
