@@ -1,5 +1,32 @@
+# Python bytecode
 __pycache__/
+*.py[cod]
+*$py.class
+
+# Packaging / build artifacts
 *.egg-info/
-*.pyc
+build/
+dist/
+.eggs/
+
+# Virtual environments
 .venv/
+venv/
+env/
 pyvenv.cfg
+
+# Test / coverage artifacts
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+tests/_coverage_html/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Paper artifact outputs (uncomment only if you do NOT want to archive them)
+# paper_artifacts/*.png
+# paper_artifacts/*.html
