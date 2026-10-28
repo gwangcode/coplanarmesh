@@ -152,14 +152,14 @@ def mremesh(mesh_list, grid_size=1e-5, eps=1e-5, min_area_eps=1e-6):
         for j in range(i + 1, num_meshes):
             meshA = current_meshes[i]
             meshB = current_meshes[j]
-            meshA_sliced, meshB_sliced, overlap_A_this_turn, overlap_B_this_turn, _ = process_and_label_coplanar(meshA,
-                                                                                                                 meshB)
+            meshA_sliced, meshB_sliced, overlap_A_this_turn, overlap_B_this_turn, _ = process_and_label_coplanar(meshA, meshB, eps=eps, grid_size=grid_size)
 
             # Evolve state queue only if actual contact collisions were observed
             if len(overlap_A_this_turn) > 0 or len(overlap_B_this_turn) > 0:
                 meshA_perfect, meshB_perfect, _, _ = clean_mesh_and_reindex(
                     meshA_sliced.vertices, meshA_sliced.faces, list(overlap_A_this_turn),
-                    meshB_sliced.vertices, meshB_sliced.faces, list(overlap_B_this_turn)
+                    meshB_sliced.vertices, meshB_sliced.faces, list(overlap_B_this_turn),
+                    eps=eps
                 )
                 current_meshes[i] = meshA_perfect
                 current_meshes[j] = meshB_perfect
