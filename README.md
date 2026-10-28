@@ -31,7 +31,7 @@ It uses boolean subtraction to hollow out the old interfaces and perfectly patch
 Microscopic slivers and overlapping double-points are the root cause of downstream mesh corruption. This utility clamps loose coordinates onto a standardized 3D discrete grid via mathematical quantization (`np.round(V / grid_size) * grid_size`), collapses degenerate triangles, merges coincidental borders, and leverages `pymeshfix` to ensure absolute watertight physical healing.
 
 ### 5. Multi-Mesh Cascade Stream Orchestration (`coplanarmesh.py`)
-The top-level stream component. It accepts a sequence of $N$ arbitrary meshes and sets up a cascading pairwise processing loop. Because a mesh modified in an early combination (e.g., Mesh A hit by Mesh B) will affect later collisions (e.g., Mesh A hitting Mesh C), the pipeline performs **"Infinite Iterative Remeshing"**. Once the physical bodies reach static topological equilibrium, it runs a reverse global RTree AABB tracking pass to map the definitive contact interface matrix.
+The top-level stream component. It accepts a sequence of $N$ arbitrary meshes and sets up a cascading pairwise processing loop. Because a mesh modified in an early combination (e.g., Mesh A hit by Mesh B) will affect later collisions (e.g., Mesh A hitting Mesh C), the pipeline performs **"single-pass cascading pairwise remeshing"**. Pairs are processed once in index order; the result can depend on input ordering. Once the physical bodies reach static topological equilibrium, it runs a reverse global RTree AABB tracking pass to map the definitive contact interface matrix.
 
 ---
 
