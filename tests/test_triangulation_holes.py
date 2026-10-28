@@ -35,3 +35,7 @@ def test_fallback_path_is_exercised(monkeypatch):
     monkeypatch.setattr(trimesh.creation, "triangulate_polygon", _boom)
     v, t = geom.remesh_shapely_polygon(_poly_with_hole(), simplify_tolerance=1e-6, area_eps=1e-12)
     assert v is not None and t is not None, "fallback must succeed or raise, not silently return None"
+
+    with pytest.warns(RuntimeWarning, match="falling back to Triangle"):
+        v, t = geom.remesh_shapely_polygon(...)
+    assert v is not None and t is not None
