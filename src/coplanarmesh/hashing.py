@@ -2,74 +2,86 @@ import numpy as np
 from collections import defaultdict
 
 
-def hash_plane_fuzzy(n, d, eps=1e-3, normal_eps=1e-5, border_eps=0.1):
-    """
-    Discretizes a 3D plane equation into discrete integer keys with a fuzzy boundary buffer.
+def _axis_bins(val, border_eps):
+    """Return 1 or 2 candidate bins for a single axis.
 
-    This prevents floating-point rounding errors from classifying the same physical
-    coplanar interface into different buckets. If a plane falls close to a bin boundary,
-    it is assigned to adjacent bins simultaneously to guarantee overlap detection.
+    If the fractional part is within border_eps of 0 or 1, the axis is
+    duplicated into the adjacent bin so that two faces straddling the
+    boundary still share at least one bucket.
+    """
+    base = int(np.floor(val))
+    frac = val - base
+    if frac < border_eps:
+        return (base, base - 1)
+    if frac > 1.0 - border_eps:
+        return (base, base + 1)
+    return (base,)
+
+
+def hash_plane_fuzzy(n, d, eps=1e-3, normal_eps=1e-5, border_eps=0.1):
+    """Discretize a 3D plane into fuzzy integer keys.
+
+    The fuzzy boundary buffer is now applied to all four dimensions
+    (nx, ny, nz, d), not only to the offset d. This guarantees that two
+    nearly identical planes straddling a bin boundary share at least one
+    key even when their normals differ by less than ``border_eps * eps``.
 
     Args:
-        n (np.ndarray): 3D unit normal vector of the plane [nx, ny, nz].
-        d (float): The signed distance from the origin (intercept parameter).
-        eps (float): Grid resolution scaling factor for voxel binning.
-        normal_eps (float): Tolerance for detecting zero or near-zero normal components.
-        border_eps (float): Sub-bin fractional threshold to trigger adjacent bucket duplication.
+        n: 3D unit normal [nx, ny, nz].
+        d: Signed distance from the origin.
+        eps: Bin width in mesh units.
+        normal_eps: Zero-component tolerance for canonicalization.
+        border_eps: Fraction of a bin treated as a boundary buffer.
 
     Returns:
-        list of tuple: A list of 4D integer keys `(nx_bin, ny_bin, nz_bin, d_bin)` representing the bins.
+        list of 4-tuples (nx_bin, ny_bin, nz_bin, d_bin). Length is
+        1, 2, 4, 8 or 16 depending on how many axes sit on a boundary.
     """
-    # Canonicalize the normal vector direction to handle anti-parallel faces (e.g., [0,0,1] vs [0,0,-1])
+    # Canonicalize anti-parallel normals (unchanged)
     flip = (n[0] < -normal_eps) if abs(n[0]) > normal_eps else (
         (n[1] < -normal_eps) if abs(n[1]) > normal_eps else (n[2] < -normal_eps))
     actual_n = -n if flip else n
     actual_d = -d if flip else d
 
-    # Scale and discretize continuous space into integers
     val_nx = actual_n[0] / eps
     val_ny = actual_n[1] / eps
     val_nz = actual_n[2] / eps
     val_d = actual_d / eps
 
+    nx_bins = _axis_bins(val_nx, border_eps)
+    ny_bins = _axis_bins(val_ny, border_eps)
+    nz_bins = _axis_bins(val_nz, border_eps)
+    d_bins = _axis_bins(val_d, border_eps)
+
+    # Cartesian product of candidate bins; at most 2^4 = 16 keys.
     keys = []
-    base_d = int(np.floor(val_d))
-    keys.append((int(np.floor(val_nx)), int(np.floor(val_ny)), int(np.floor(val_nz)), base_d))
-
-    # Dual-grid mapping: Duplicate plane keys into adjacent bins if it sits on the boundary buffer
-    frac_d = val_d - base_d
-    if frac_d < border_eps:
-        keys.append((int(np.floor(val_nx)), int(np.floor(val_ny)), int(np.floor(val_nz)), base_d - 1))
-    elif frac_d > 1 - border_eps:
-        keys.append((int(np.floor(val_nx)), int(np.floor(val_ny)), int(np.floor(val_nz)), base_d + 1))
-
+    for nx in nx_bins:
+        for ny in ny_bins:
+            for nz in nz_bins:
+                for dd in d_bins:
+                    keys.append((nx, ny, nz, dd))
     return keys
 
 
-def precompute_plane_drawers(mesh, normal_eps=1e-5):
-    """
-    Pre-computes and groups all faces of a given mesh into fuzzy coplanar buckets.
+def precompute_plane_drawers(mesh, normal_eps=1e-5, eps=1e-3, border_eps=0.1):
+    """Group all faces of a mesh into fuzzy coplanar buckets.
 
     Args:
-        mesh (trimesh.Trimesh): The target 3D triangular mesh.
-        normal_eps (float): Tolerance threshold to discard degenerate zero-area faces.
-
-    Returns:
-        defaultdict(list): A mapping from 4D plane keys to lists of tuples `(face_index, normal, intercept)`.
+        mesh: trimesh.Trimesh input.
+        normal_eps: Zero-component tolerance used during canonicalization.
+        eps: Bin width in mesh units.
+        border_eps: Sub-bin boundary buffer fraction applied to all axes.
     """
     drawer = defaultdict(list)
     for i, face in enumerate(mesh.faces):
         tri = mesh.vertices[face]
-        # Compute face normal via cross product
         n = np.cross(tri[1] - tri[0], tri[2] - tri[0])
         norm = np.linalg.norm(n)
         if norm < normal_eps:
-            continue  # Ignore degenerate triangles
+            continue
         n /= norm
         d = -np.dot(n, tri[0])
-
-        # Distribute the face ID to its corresponding fuzzy spatial bins
-        keys = hash_plane_fuzzy(n, d)
+        keys = hash_plane_fuzzy(n, d, eps=eps, normal_eps=normal_eps, border_eps=border_eps)
         for key in keys:
             drawer[key].append((i, n, d))
     return drawer
