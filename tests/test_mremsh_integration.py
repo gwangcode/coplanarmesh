@@ -28,6 +28,7 @@ def test_mremesh_returns_aligned_meshes_and_pairs():
     assert all(0 <= p[0] < p[2] < 3 for p in pairs)
 
 
+@pytest.mark.slow
 def test_mremesh_is_order_dependent():
     """Document the known order dependence explicitly."""
     base, b1, b2 = _base_and_two_bodies()
