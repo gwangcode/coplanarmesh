@@ -124,12 +124,10 @@ def clean_mesh_and_reindex(vertsA, facesA, overlapA, vertsB, facesB, overlapB, r
 
 def mremesh(mesh_list, grid_size=1e-5, eps=1e-5, min_area_eps=1e-6):
     """
-    Executes a unified, cascading coplanar intersection stream and realigns global mesh indices.
-
-    This function accepts an arbitrary sequence of N overlapping or touching 3D meshes,
-    iteratively slices their co-planar contact interfaces via an infinite remeshing loop
-    to reach topological equilibrium, and returns the healed meshes along with an immutable
-    physical contact alignment matrix.
+    Executes a single-pass, cascading O(N^2) pairwise coplanar
+    intersection stream over N meshes, followed by a final RTree/AABB
+    contact audit. Pairs are processed once in index order; the result
+    therefore depends on input ordering.
 
     Args:
         mesh_list (list of trimesh.Trimesh): The target sequence of input 3D meshes.
@@ -222,11 +220,12 @@ def mremesh(mesh_list, grid_size=1e-5, eps=1e-5, min_area_eps=1e-6):
 
 def sremesh(meshA, meshB):
     """
-    Executes boundary-aligned topological remeshing for multi-body 3D geometries
-    sharing touching co-planar interfaces.
+    Executes boundary-aligned topological remeshing for two 3D meshes
+    sharing a coplanar contact interface.
 
-    This is the high-level API utilized as an optical simulation pre-processor
-    to eliminate numerical ray-flickering and enforce energy conservation laws.
+    Note: this function produces topologically conforming interfaces
+    within the supplied tolerances. It does not measure or guarantee
+    downstream ray-tracing or energy-conservation behavior.
 
     Args:
         meshA (trimesh.Trimesh): The first 3D manifold geometry (e.g., Lens A).
