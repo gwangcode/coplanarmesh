@@ -14,12 +14,9 @@ concurrency:
 jobs:
   # ---------------------------------------------------------------------------
   # Fast test suite: runs on every PR and push.
-  # - Python 3.9 - 3.13 matrix
-  # - Skips tests marked "slow"
   # ---------------------------------------------------------------------------
   tests:
     name: tests (py${{ matrix.python-version }})
-    # Pinned: actions/setup-python has no Python 3.9 build for Ubuntu 26.04.
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -44,8 +41,8 @@ jobs:
       - name: Install package and test dependencies
         run: |
           python -m pip install --upgrade pip
-          # Explicitly install pytest and scipy to avoid missing extras issues
-          pip install -e . pytest pytest-cov scipy
+          # ADDED: rtree is required by trimesh for AABB spatial queries
+          pip install -e . pytest pytest-cov scipy rtree
 
       - name: Show environment
         run: |
@@ -97,7 +94,8 @@ jobs:
       - name: Install package and test dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e . pytest scipy
+          # ADDED: rtree
+          pip install -e . pytest scipy rtree
 
       - name: Run slow tests
         run: |
@@ -114,8 +112,7 @@ jobs:
           if-no-files-found: ignore
 
   # ---------------------------------------------------------------------------
-  # Reproduce-paper-artifacts job: verifies that
-  # examples/reproduce_paper_artifacts.py runs end-to-end in --quick mode.
+  # Reproduce-paper-artifacts job
   # ---------------------------------------------------------------------------
   reproduce-artifacts:
     name: reproduce paper artifacts (--quick)
@@ -140,7 +137,6 @@ jobs:
       - name: Install package and reproduction dependencies
         run: |
           python -m pip install --upgrade pip
-          # Explicitly install all dependencies required by the script
           pip install -e . pytest scipy pandas matplotlib rtree
 
       - name: Run reproduction script (quick mode)
