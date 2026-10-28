@@ -12,9 +12,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ---------------------------------------------------------------------------
-  # Fast test suite: runs on every PR and push.
-  # ---------------------------------------------------------------------------
   tests:
     name: tests (py${{ matrix.python-version }})
     runs-on: ubuntu-24.04
@@ -41,8 +38,8 @@ jobs:
       - name: Install package and test dependencies
         run: |
           python -m pip install --upgrade pip
-          # ADDED: rtree is required by trimesh for AABB spatial queries
-          pip install -e . pytest pytest-cov scipy rtree
+          # ADDED: networkx
+          pip install -e . pytest pytest-cov scipy rtree networkx
 
       - name: Show environment
         run: |
@@ -68,9 +65,6 @@ jobs:
             coverage.xml
           if-no-files-found: ignore
 
-  # ---------------------------------------------------------------------------
-  # Slow test suite: runs only on main and manual dispatch.
-  # ---------------------------------------------------------------------------
   slow-tests:
     name: slow tests (py3.11)
     runs-on: ubuntu-24.04
@@ -94,8 +88,8 @@ jobs:
       - name: Install package and test dependencies
         run: |
           python -m pip install --upgrade pip
-          # ADDED: rtree
-          pip install -e . pytest scipy rtree
+          # ADDED: networkx
+          pip install -e . pytest scipy rtree networkx
 
       - name: Run slow tests
         run: |
@@ -111,9 +105,6 @@ jobs:
           path: pytest_slow.xml
           if-no-files-found: ignore
 
-  # ---------------------------------------------------------------------------
-  # Reproduce-paper-artifacts job
-  # ---------------------------------------------------------------------------
   reproduce-artifacts:
     name: reproduce paper artifacts (--quick)
     runs-on: ubuntu-24.04
@@ -137,7 +128,8 @@ jobs:
       - name: Install package and reproduction dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e . pytest scipy pandas matplotlib rtree
+          # ADDED: networkx
+          pip install -e . pytest scipy pandas matplotlib rtree networkx
 
       - name: Run reproduction script (quick mode)
         run: |
