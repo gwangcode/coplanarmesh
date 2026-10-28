@@ -116,7 +116,7 @@ def patch_single_mesh(mesh, regions, face_ids_to_remove, is_mesh_b=False, digits
     actual_overlap_indices = np.where(survived_mask)[0]
     return cleaned_mesh, list(actual_overlap_indices)
 
-def extract_coplanar_overlap_pure_id(meshA, meshB, eps=1e-3):
+def extract_coplanar_overlap_pure_id(meshA, meshB, eps=1e-3, normal_eps=1e-5, border_eps=0.1):
     """
     Analyzes two meshes to extract boolean intersecting regions on common plane channels.
 
@@ -139,8 +139,8 @@ def extract_coplanar_overlap_pure_id(meshA, meshB, eps=1e-3):
     coplanar_pairs = []
 
     # Initialize RTree spatial indexing structures and fuzzy plane drawer maps
-    drawersA = precompute_plane_drawers(meshA)
-    drawersB = precompute_plane_drawers(meshB)
+    drawersA = precompute_plane_drawers(meshA, normal_eps=normal_eps, eps=eps, border_eps=border_eps)
+    drawersB = precompute_plane_drawers(meshB, normal_eps=normal_eps, eps=eps, border_eps=border_eps)
     b_rtree = meshB.triangles_tree
     common_plane_keys = set(drawersA.keys()).intersection(set(drawersB.keys()))
 
