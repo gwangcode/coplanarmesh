@@ -2,6 +2,7 @@ import numpy as np
 import trimesh
 import triangle as tr
 from shapely.geometry import Polygon
+import warnings
 
 def get_projection_axes(n):
     """
@@ -37,29 +38,12 @@ def project_to_plane_with_axes(points, x, y):
     return np.dot(points, np.vstack([x, y]).T)
 
 def remesh_shapely_polygon(polygon_2d, simplify_tolerance=1e-4, area_eps=1e-5):
-    """
-    Re-triangulates a complex 2D Shapely polygon (with optional holes) into a clean 2D mesh.
-
-    This function attempts a dual-layer triangulation strategy: using Trimesh's native
-    front-end first, and falling back to a raw C-based Triangle constraint solver if
-    self-intersections or numerical singularities occur.
-
-    Args:
-        polygon_2d (shapely.geometry.Polygon): The 2D polygon region to be triangulated.
-        simplify_tolerance (float): Geometric simplification factor used during fallback cleanup.
-        area_eps (float): Minimum area threshold below which polygons are discarded as slivers.
-
-    Returns:
-        tuple: `(vertices_2d, triangles)` where vertices_2d is an Nx2 array and triangles is an Mx3 array.
-               Returns `(None, None)` if triangulation fails or the polygon is too small.
-    """
     if polygon_2d is None or polygon_2d.is_empty or polygon_2d.area < area_eps:
         return None, None
 
-    # Resolve zero-width self-intersections using standard zero-buffer trick
     polygon_2d = polygon_2d.buffer(0)
 
-    # Strategy 1: Trimesh high-level triangulation wrapper
+    # Strategy 1
     try:
         clean_poly = polygon_2d.simplify(tolerance=simplify_tolerance, preserve_topology=True)
         if clean_poly.is_empty or clean_poly.geom_type != "Polygon":
@@ -67,18 +51,36 @@ def remesh_shapely_polygon(polygon_2d, simplify_tolerance=1e-4, area_eps=1e-5):
         verts2d, tris = trimesh.creation.triangulate_polygon(clean_poly)
         if verts2d is not None and len(tris) > 0:
             return np.array(verts2d), np.array(tris)
-    except:
-        pass  # Fall through to standard constraint solver on exception
+    except Exception as e:
+        warnings.warn(
+            f"trimesh triangulation failed ({type(e).__name__}: {e}); "
+            f"falling back to Triangle.",
+            RuntimeWarning,
+        )
 
-    # Strategy 2: Fallback to robust C-based Triangle graph mesh generator
+    # Strategy 2: 处理 holes
     try:
         if polygon_2d.geom_type == "Polygon":
-            pts2d = np.array(polygon_2d.exterior.coords)[:-1]
-            if len(pts2d) >= 3:
-                poly = {'vertices': pts2d, 'segments': [[k, (k + 1) % len(pts2d)] for k in range(len(pts2d))]}
-                t = tr.triangulate(poly, 'p')  # 'p' triggers constrained Delaunay triangulation
-                return t['vertices'], t['triangles']
-    except:
-        pass
+            exterior = np.array(polygon_2d.exterior.coords)[:-1]
+            vertices = exterior
+            segments = [[k, (k + 1) % len(exterior)] for k in range(len(exterior))]
+            holes = []
+            for interior in polygon_2d.interiors:
+                ring = np.array(interior.coords)[:-1]
+                offset = len(vertices)
+                vertices = np.vstack([vertices, ring])
+                segments += [[offset + k, offset + (k + 1) % len(ring)] for k in range(len(ring))]
+                holes.append([offset, offset + len(ring) // 2])  # 取内环上两点标记 hole
+
+            poly = {'vertices': vertices, 'segments': segments}
+            if holes:
+                poly['holes'] = holes
+            t = tr.triangulate(poly, 'p')
+            return t['vertices'], t['triangles']
+    except Exception as e:
+        raise RuntimeError(
+            f"Both triangulation strategies failed for polygon with "
+            f"{len(polygon_2d.interiors)} hole(s)."
+        ) from e
 
     return None, None
