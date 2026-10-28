@@ -20,7 +20,9 @@ jobs:
   # ---------------------------------------------------------------------------
   tests:
     name: tests (py${{ matrix.python-version }})
-    runs-on: ubuntu-latest
+    # Pinned: actions/setup-python has no Python 3.9 build for Ubuntu 26.04
+    # (ubuntu-latest now points to 26.04, which lacks Python 3.9 prebuilt packages).
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -76,7 +78,7 @@ jobs:
   # ---------------------------------------------------------------------------
   slow-tests:
     name: slow tests (py3.11)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event_name != 'pull_request'
 
     steps:
@@ -116,11 +118,10 @@ jobs:
   # ---------------------------------------------------------------------------
   # Reproduce-paper-artifacts job: verifies that
   # examples/reproduce_paper_artifacts.py runs end-to-end in --quick mode.
-  # This is what Major 8 asks for: "scripts that reproduce every result".
   # ---------------------------------------------------------------------------
   reproduce-artifacts:
     name: reproduce paper artifacts (--quick)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event_name != 'pull_request'
 
     steps:
@@ -165,11 +166,10 @@ jobs:
 
   # ---------------------------------------------------------------------------
   # Optional lint job: ruff check. Non-blocking on PR, blocking on main.
-  # Remove this job if you do not want linting in CI.
   # ---------------------------------------------------------------------------
   lint:
     name: lint (ruff)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
@@ -189,37 +189,4 @@ jobs:
       - name: Run ruff
         run: |
           ruff check src tests examples
-        continue-on-error: ${{ github.event_name == 'pull_request' }}name: CI Build and Test
-
-on:
-  push:
-    branches: [ "main", "master" ]
-  pull_request:
-    branches: [ "main", "master" ]
-
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10", "3.11"]
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        pip install -e .
-
-    - name: Run Unit Tests with Pytest
-      run: |
-        pytest
+        continue-on-error: ${{ github.event_name == 'pull_request' }}
