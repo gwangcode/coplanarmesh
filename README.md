@@ -1,6 +1,6 @@
 # CoplanarMesh 🚀
 
-[![DOI](https://zenodo.org/badge/1267453056.svg)](https://doi.org/10.5281/zenodo.20669005)
+[![DOI](https://zenodo.org/badge/1267453056.svg)](https://doi.org/10.5281/zenodo.23749150)
 [![CI Build and Test](https://github.com/gwangcode/coplanarmesh/actions/workflows/ci.yml/badge.svg)](https://github.com/gwangcode/coplanarmesh/actions)
 
 **CoplanarMesh** is a robust, industrial-grade 3D triangular mesh pipeline designed for **coplanar overlap detection, adaptive slicing, watertight stitching, and global index re-alignment**. 
