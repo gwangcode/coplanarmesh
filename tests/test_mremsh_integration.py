@@ -1,8 +1,15 @@
 # tests/test_mremsh_integration.py
 import itertools
+
 import numpy as np
+import pytest
 import trimesh
+
 from coplanarmesh.coplanarmesh import mremesh
+
+@pytest.mark.slow
+def test_mremesh_is_order_dependent():
+    ...
 
 
 def _base_and_two_bodies():
