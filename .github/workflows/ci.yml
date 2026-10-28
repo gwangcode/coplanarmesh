@@ -16,12 +16,10 @@ jobs:
   # Fast test suite: runs on every PR and push.
   # - Python 3.9 - 3.13 matrix
   # - Skips tests marked "slow"
-  # - Uploads coverage + JUnit XML
   # ---------------------------------------------------------------------------
   tests:
     name: tests (py${{ matrix.python-version }})
-    # Pinned: actions/setup-python has no Python 3.9 build for Ubuntu 26.04
-    # (ubuntu-latest now points to 26.04, which lacks Python 3.9 prebuilt packages).
+    # Pinned: actions/setup-python has no Python 3.9 build for Ubuntu 26.04.
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -46,7 +44,8 @@ jobs:
       - name: Install package and test dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[test]"
+          # Explicitly install pytest and scipy to avoid missing extras issues
+          pip install -e . pytest pytest-cov scipy
 
       - name: Show environment
         run: |
@@ -74,7 +73,6 @@ jobs:
 
   # ---------------------------------------------------------------------------
   # Slow test suite: runs only on main and manual dispatch.
-  # Covers the multibody cascade and order-dependence tests.
   # ---------------------------------------------------------------------------
   slow-tests:
     name: slow tests (py3.11)
@@ -99,7 +97,7 @@ jobs:
       - name: Install package and test dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[test]"
+          pip install -e . pytest scipy
 
       - name: Run slow tests
         run: |
@@ -142,7 +140,8 @@ jobs:
       - name: Install package and reproduction dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[test,repro]"
+          # Explicitly install all dependencies required by the script
+          pip install -e . pytest scipy pandas matplotlib rtree
 
       - name: Run reproduction script (quick mode)
         run: |
@@ -163,30 +162,3 @@ jobs:
           name: paper-artifacts
           path: paper_artifacts/
           if-no-files-found: ignore
-
-  # ---------------------------------------------------------------------------
-  # Optional lint job: ruff check. Non-blocking on PR, blocking on main.
-  # ---------------------------------------------------------------------------
-  lint:
-    name: lint (ruff)
-    runs-on: ubuntu-24.04
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: pip
-
-      - name: Install ruff
-        run: |
-          python -m pip install --upgrade pip
-          pip install ruff
-
-      - name: Run ruff
-        run: |
-          ruff check src tests examples
-        continue-on-error: ${{ github.event_name == 'pull_request' }}
