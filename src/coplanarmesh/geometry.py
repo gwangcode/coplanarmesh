@@ -58,7 +58,7 @@ def remesh_shapely_polygon(polygon_2d, simplify_tolerance=1e-4, area_eps=1e-5):
             RuntimeWarning,
         )
 
-    # Strategy 2: 处理 holes
+    # Strategy 2: Fallback to Triangle
     try:
         if polygon_2d.geom_type == "Polygon":
             exterior = np.array(polygon_2d.exterior.coords)[:-1]
@@ -70,7 +70,10 @@ def remesh_shapely_polygon(polygon_2d, simplify_tolerance=1e-4, area_eps=1e-5):
                 offset = len(vertices)
                 vertices = np.vstack([vertices, ring])
                 segments += [[offset + k, offset + (k + 1) % len(ring)] for k in range(len(ring))]
-                holes.append([offset, offset + len(ring) // 2])  # 取内环上两点标记 hole
+               
+                hole_poly = Polygon(ring)
+                pt = hole_poly.representative_point()
+                holes.append([pt.x, pt.y]) 
 
             poly = {'vertices': vertices, 'segments': segments}
             if holes:

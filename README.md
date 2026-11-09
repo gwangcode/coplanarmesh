@@ -3,7 +3,7 @@
 [![DOI](https://zenodo.org/badge/1267453056.svg)](https://doi.org/10.5281/zenodo.23749150)
 [![CI Build and Test](https://github.com/gwangcode/coplanarmesh/actions/workflows/ci.yml/badge.svg)](https://github.com/gwangcode/coplanarmesh/actions)
 
-**CoplanarMesh** is a robust, industrial-grade 3D triangular mesh pipeline designed for **coplanar overlap detection, adaptive slicing, watertight stitching, and global index re-alignment**. 
+**CoplanarMesh** is a robust, 3D triangular mesh pipeline designed for **coplanar overlap detection, adaptive slicing, watertight stitching, and global index re-alignment**. 
 
 It is engineered specifically to eliminate structural crashes (such as Shapely's `TopologyException` or facet intersecting slivers) caused by floating-point rounding errors, zero-thickness contact interfaces, and razor-sharp boundary anomalies typically found in CAD (STEP/IGES) or BIM (Revit/IFC) exported tessellated meshes.
 
@@ -125,7 +125,7 @@ mesh_lens_b = trimesh.load("lens_b.stl")
 lens_a_clean, lens_b_clean, overlap_pairs = sremesh(mesh_lens_a, mesh_lens_b)
 
 # Now lens_a_clean and lens_b_clean share perfectly aligned interface topologies,
-# preventing ray-flickering and ensuring energy conservation in your ray-tracer!
+# providing topologically aligned interfaces as a precondition for downstream solvers in your ray-tracer!
 
 ```
 
@@ -172,7 +172,7 @@ coplanarmesh/
 │   └── workflows/
 │       └── ci.yml              # GitHub Actions CI workflow
 ├── tests/                      # Automated pytest unit test suite
-├── softwareX_revision_codes/   # One-click paper artifact reproduction scripts
+├── python examples/reproduce_paper_artifacts.py   # One-click paper artifact reproduction scripts
 ├── pyproject.toml              # Modern setuptools pep517 build backend
 ├── requirements.txt            # Environment dependencies
 ├── README.md                   # Technical documentation and layout manual
